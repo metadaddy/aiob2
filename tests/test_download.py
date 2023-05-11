@@ -1,3 +1,4 @@
+import datetime
 import os
 import pytest
 import logging
@@ -81,8 +82,7 @@ class TestDownload:
         content_disposition = f'attachment; filename="filename.jpg"'
         content_language = 'de-DE'
         expires = 'Wed, 21 Oct 2015 07:28:00 GMT'
-        # TODO: this is a valid value for cache-control, but DownloadedFile tries to parse it as a timestamp
-        # cache_control = 'max-age=604800, must-revalidate'
+        cache_control = 'max-age=604800, must-revalidate'
         content_encoding = 'compress'
         content_type = 'text/html;charset=utf-8'
 
@@ -92,7 +92,7 @@ class TestDownload:
             content_disposition=content_disposition,
             content_language=content_language,
             expires=expires,
-            # cache_control=cache_control,
+            cache_control=cache_control,
             content_encoding=content_encoding,
             content_type=content_type
         )
@@ -102,10 +102,8 @@ class TestDownload:
         assert downloaded_file.content == path.read_bytes()
         assert downloaded_file.content_disposition == content_disposition
         assert downloaded_file.content_language == content_language
-        # TODO: cache-control header is not exposed by DownloadedFile, and the logic that sets expires needs some
-        #       attention
-        # assert downloaded_file.cache_control == cache_control
-        # assert downloaded_file.expires == expires
+        assert downloaded_file.cache_control == cache_control
+        assert downloaded_file.expires == datetime.datetime.strptime(expires, '%a, %d %b %Y %H:%M:%S %Z')
         assert downloaded_file.content_encoding == content_encoding
         assert downloaded_file.content_type == content_type
 
